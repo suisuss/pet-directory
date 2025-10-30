@@ -60,7 +60,8 @@ show_help() {
     echo -e "  ${CYAN}rollback${NC}   - Rollback last migration"
     echo ""
     echo -e "${BOLD}Development Commands:${NC}"
-    echo -e "  ${CYAN}test${NC}       - Run test script to populate sample data"
+    echo -e "  ${CYAN}test${NC}       - Run pytest unit tests with coverage"
+    echo -e "  ${CYAN}api-test${NC}   - Run API integration test script"
     echo -e "  ${CYAN}format${NC}     - Format Python code with black and ruff"
     echo -e "  ${CYAN}lint${NC}       - Run linting checks"
     echo -e "  ${CYAN}typecheck${NC}  - Run type checking with mypy"
@@ -153,6 +154,30 @@ rebuild_dev() {
 
 # Run tests
 run_tests() {
+    COMPOSE_CMD=$(get_compose_command)
+    print_section "Running Tests"
+    
+    # Check if specific test file/pattern provided
+    if [ -n "$1" ]; then
+        print_info "Running specific tests: $1"
+        $COMPOSE_CMD -f docker-compose.development.yml exec api pytest tests/$1 -v
+    else
+        print_info "Running all tests with coverage..."
+        $COMPOSE_CMD -f docker-compose.development.yml exec api pytest
+    fi
+    
+    # Show coverage report location
+    if [ $? -eq 0 ]; then
+        echo
+        print_success "Tests completed successfully!"
+        print_info "Coverage report available in htmlcov/index.html"
+    else
+        print_error "Some tests failed. Check the output above."
+    fi
+}
+
+# Run API integration tests  
+run_api_test() {
     if [ ! -f "./test_api.sh" ]; then
         print_error "Test script not found!"
         exit 1
@@ -465,7 +490,10 @@ case "$1" in
     
     # Development commands
     test)
-        run_tests
+        run_tests "$2"
+        ;;
+    api-test)
+        run_api_test
         ;;
     format)
         format_code

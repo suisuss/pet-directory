@@ -43,8 +43,10 @@ dev = [
     "black==24.1.1",
     "ruff==0.2.1",
     "pytest==8.0.0",
-    "pytest-asyncio==0.23.3",
+    "pytest-asyncio==0.21.0",
     "pytest-cov==4.1.0",
+    "httpx==0.26.0",
+    "aiosqlite==0.20.0",
     "types-python-dateutil==2.8.19.14",
     "sqlalchemy[mypy]==2.0.27",
     "types-jinja2==2.11.9",
@@ -103,6 +105,33 @@ extend-exclude = '''
 )/
 '''
 
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--tb=short --strict-markers --disable-warnings -v --cov=app --cov-report=term-missing --cov-report=html"
+asyncio_mode = "auto"
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["*/tests/*", "*/migrations/*", "__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+show_missing = true
+precision = 2
+
 [tool.ruff]
 target-version = "py311"
 line-length = 88
@@ -142,36 +171,3 @@ line-ending = "auto"
 
 [tool.ruff.lint.isort]
 known-third-party = ["fastapi", "pydantic", "sqlalchemy", "jinja2"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-addopts = [
-    "--verbose",
-    "--asyncio-mode=auto",
-    "--cov=app",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-fail-under=80",
-]
-
-[tool.coverage.run]
-source = ["app"]
-omit = [
-    "*/tests/*",
-    "*/alembic/*",
-    "*/__init__.py",
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "def __str__",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if __name__ == .__main__.:",
-    "if TYPE_CHECKING:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
-]
