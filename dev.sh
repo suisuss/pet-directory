@@ -49,7 +49,8 @@ show_help() {
     echo -e "${BOLD}Service Commands:${NC}"
     echo -e "  ${CYAN}logs${NC}       - Show logs from all services"
     echo -e "  ${CYAN}api${NC}        - Follow API logs"
-    echo -e "  ${CYAN}worker${NC}     - Follow worker logs"
+    echo -e "  ${CYAN}worker${NC}     - Follow report worker logs"
+    echo -e "  ${CYAN}detector${NC}   - Follow change detector logs"
     echo -e "  ${CYAN}db${NC}         - Follow database logs"
     echo ""
     echo -e "${BOLD}Database Commands:${NC}"
@@ -207,6 +208,13 @@ worker_logs() {
     COMPOSE_CMD=$(get_compose_command)
     print_info "Worker logs (Ctrl+C to exit)..."
     $COMPOSE_CMD -f docker-compose.development.yml logs -f worker
+}
+
+# Show change detector logs
+detector_logs() {
+    COMPOSE_CMD=$(get_compose_command)
+    print_info "Change Detector logs (Ctrl+C to exit)..."
+    $COMPOSE_CMD -f docker-compose.development.yml logs -f change-detector
 }
 
 # Show API logs
@@ -466,6 +474,9 @@ case "$1" in
         ;;
     worker)
         worker_logs
+        ;;
+    detector)
+        detector_logs
         ;;
     db)
         db_logs

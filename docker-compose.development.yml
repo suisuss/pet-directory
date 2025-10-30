@@ -60,6 +60,24 @@ services:
     networks:
       - pets_network_dev
 
+  change-detector:
+    build:
+      context: .
+      target: development
+    environment:
+      DATABASE_URL: postgresql+asyncpg://pets_user:pets_password@db:5432/pets_db
+      DEBUG: "true"
+      PYTHONUNBUFFERED: 1
+    depends_on:
+      db:
+        condition: service_healthy
+    command: python -m app.worker.change_detector
+    volumes:
+      - ./app:/app/app
+    networks:
+      - pets_network_dev
+    restart: unless-stopped
+
   adminer:
     image: adminer
     restart: always
