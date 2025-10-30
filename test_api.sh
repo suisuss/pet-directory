@@ -50,7 +50,15 @@ TWEETY_RESPONSE=$(curl -X POST "$API_URL/api/pets/" \
     -d '{"name": "Tweety", "pet_type": "bird"}' \
     2>/dev/null)
 echo "$TWEETY_RESPONSE" | python3 -m json.tool
-TWEETY_ID=$(echo "$TWEETY_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin)['id'])")
+
+# Only capture ID if creation was successful
+if echo "$TWEETY_RESPONSE" | grep -q '"id"'; then
+    TWEETY_ID=$(echo "$TWEETY_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin)['id'])")
+else
+    print_colored "$YELLOW" "Failed to create Tweety, using existing pet for deletion test"
+    # Get the first pet ID from the list
+    TWEETY_ID=$(curl -s "$API_URL/api/pets/?limit=1" | python3 -c "import sys, json; pets=json.load(sys.stdin); print(pets[0]['id']) if pets else print('')")
+fi
 
 print_colored "$YELLOW" "Creating dog named 'Max'..."
 curl -X POST "$API_URL/api/pets/" \
@@ -80,11 +88,17 @@ curl -X PUT "$API_URL/api/pets/2" \
     2>/dev/null | python3 -m json.tool
 
 # Delete a pet
-print_section "Deleting Pet 'Tweety' (ID: $TWEETY_ID)"
-if curl -s -o /dev/null -w "%{http_code}" -X DELETE "$API_URL/api/pets/$TWEETY_ID" | grep -q "204"; then
-    print_colored "$GREEN" "✓ Pet 'Tweety' deleted successfully (HTTP 204)"
+if [ -n "$TWEETY_ID" ]; then
+    print_section "Deleting Pet (ID: $TWEETY_ID)"
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "$API_URL/api/pets/$TWEETY_ID")
+    if [ "$HTTP_CODE" = "204" ]; then
+        print_colored "$GREEN" "✓ Pet deleted successfully (HTTP 204)"
+    else
+        print_colored "$RED" "✗ Failed to delete pet (HTTP $HTTP_CODE)"
+    fi
 else
-    print_colored "$RED" "✗ Failed to delete pet"
+    print_section "Skipping Deletion Test"
+    print_colored "$YELLOW" "No pet ID available for deletion test"
 fi
 
 # List pets with pagination

@@ -1,0 +1,16 @@
+# Auto-generated from pyproject.toml - DO NOT EDIT MANUALLY
+# Regenerate with: python scripts/generate_requirements.py
+
+# Production dependencies
+-r requirements.txt
+
+# Development dependencies
+black==24.1.1
+mypy==1.8.0
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+pytest==8.0.0
+ruff==0.2.1
+sqlalchemy[mypy]==2.0.27
+types-jinja2==2.11.9
+types-python-dateutil==2.8.19.14
