@@ -1,0 +1,31 @@
+╔════════════════════════════════════════════════════════════════╗
+║                    PET DIRECTORY REPORT                        ║
+║                 Generated: {{ timestamp }}                     ║
+╚════════════════════════════════════════════════════════════════╝
+
+📊 SUMMARY
+-----------
+Total Pets: {{ total_pets }}
+
+{% if pets_by_type %}
+📈 PETS BY TYPE
+---------------
+{% for pet_type, pet_list in pets_by_type.items() %}
+  • {{ pet_type|capitalize }}: {{ pet_list|length }} pet(s)
+{% endfor %}
+
+{% endif %}
+📋 DETAILED PET LIST
+--------------------
+{% if pets %}
+{% for pet in pets %}
+{{ loop.index }}. {{ pet.name }}
+   Type: {{ pet.pet_type|capitalize }}
+   ID: #{{ pet.id }}
+   Registered: {{ pet.created_at.strftime('%Y-%m-%d %H:%M') }}
+{% endfor %}
+{% else %}
+   No pets currently in the directory.
+{% endif %}
+
+════════════════════════════════════════════════════════════════
