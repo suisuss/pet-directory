@@ -1,0 +1,105 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop, improved-testing ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+
+    - name: Run Ruff linter
+      run: |
+        ruff check app/ tests/ --output-format=github
+
+    - name: Run Ruff formatter check
+      run: |
+        ruff format --check app/ tests/
+
+    - name: Run Black formatter check
+      run: |
+        black --check app/ tests/
+
+    - name: Run mypy type checker
+      run: |
+        mypy app/
+
+    - name: Check import sorting
+      run: |
+        ruff check --select I app/ tests/
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit[toml] safety
+
+    - name: Run Bandit security linter
+      run: |
+        bandit -r app/ -f json -o bandit-report.json || true
+        bandit -r app/ -f screen
+
+    - name: Check dependencies for known security vulnerabilities
+      run: |
+        safety check --json || true
+        safety check
+
+    - name: Upload Bandit report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: bandit-security-report
+        path: bandit-report.json
+        retention-days: 30
+
+  complexity:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install radon
+
+    - name: Check cyclomatic complexity
+      run: |
+        radon cc app/ -a -s
+
+    - name: Check maintainability index
+      run: |
+        radon mi app/ -s
