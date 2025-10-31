@@ -164,6 +164,11 @@ ignore = [
     "C901",   # too complex
     "S101",   # use of assert
     "PLR0913", # too many arguments
+    "PLR2004", # magic value used in comparison
+    "B017",   # pytest.raises(Exception) considered evil
+    "SIM105", # use contextlib.suppress
+    "F841",   # local variable assigned but never used
+    "N806",   # variable in function should be lowercase
 ]
 
 [tool.ruff.format]
