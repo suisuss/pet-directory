@@ -123,6 +123,11 @@ class TestPetUpdate:
         assert pet.name is None
         assert pet.pet_type is None
 
+    def test_pet_type_none_passthrough(self) -> None:
+        """Test that None pet_type is not lowercased."""
+        pet = PetUpdate(pet_type=None)
+        assert pet.pet_type is None
+
 
 class TestPetResponse:
     """Tests for PetResponse schema."""

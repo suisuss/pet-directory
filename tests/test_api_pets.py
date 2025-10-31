@@ -336,3 +336,160 @@ class TestPetStats:
         assert data["pets_by_type"]["dog"] == 2
         assert data["pets_by_type"]["cat"] == 2
         assert data["pets_by_type"]["bird"] == 1
+
+
+@pytest.mark.asyncio
+class TestDatabaseErrorHandling:
+    """Tests for database error handling in API endpoints."""
+
+    async def test_create_pet_database_error(
+        self, client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test create pet handles database errors."""
+        from sqlalchemy.exc import SQLAlchemyError
+        from app.repositories.pet import PetRepository
+
+        async def mock_create_error(*args, **kwargs):
+            raise SQLAlchemyError("Database connection failed")
+
+        monkeypatch.setattr(PetRepository, "create", mock_create_error)
+
+        response = await client.post(
+            "/api/pets/", json={"name": "Test", "pet_type": "dog"}
+        )
+
+        assert response.status_code == 500
+        assert "database error" in response.json()["detail"].lower()
+
+    async def test_create_pet_integrity_error(
+        self, client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test create pet handles integrity constraint violations."""
+        from sqlalchemy.exc import IntegrityError
+        from app.repositories.pet import PetRepository
+
+        async def mock_create_integrity_error(*args, **kwargs):
+            raise IntegrityError("", "", "")
+
+        monkeypatch.setattr(PetRepository, "create", mock_create_integrity_error)
+
+        response = await client.post(
+            "/api/pets/", json={"name": "Test", "pet_type": "dog"}
+        )
+
+        assert response.status_code == 400
+        assert "integrity" in response.json()["detail"].lower()
+
+    async def test_list_pets_database_error(
+        self, client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test list pets handles database errors."""
+        from sqlalchemy.exc import SQLAlchemyError
+        from app.repositories.pet import PetRepository
+
+        async def mock_get_multi_error(*args, **kwargs):
+            raise SQLAlchemyError("Database connection failed")
+
+        monkeypatch.setattr(PetRepository, "get_multi", mock_get_multi_error)
+
+        response = await client.get("/api/pets/")
+
+        assert response.status_code == 500
+        assert "database error" in response.json()["detail"].lower()
+
+    async def test_list_pets_by_type_database_error(
+        self, client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test list pets by type handles database errors."""
+        from sqlalchemy.exc import SQLAlchemyError
+        from app.repositories.pet import PetRepository
+
+        async def mock_get_by_type_error(*args, **kwargs):
+            raise SQLAlchemyError("Database connection failed")
+
+        monkeypatch.setattr(PetRepository, "get_by_type", mock_get_by_type_error)
+
+        response = await client.get("/api/pets/?pet_type=dog")
+
+        assert response.status_code == 500
+        assert "database error" in response.json()["detail"].lower()
+
+    async def test_update_pet_integrity_error(
+        self, client: AsyncClient, sample_pet_data: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test update pet handles integrity constraint violations."""
+        from sqlalchemy.exc import IntegrityError
+        from app.repositories.pet import PetRepository
+
+        # Create a pet first
+        create_response = await client.post("/api/pets/", json=sample_pet_data)
+        pet_id = create_response.json()["id"]
+
+        async def mock_update_integrity_error(*args, **kwargs):
+            raise IntegrityError("", "", "")
+
+        monkeypatch.setattr(PetRepository, "update", mock_update_integrity_error)
+
+        response = await client.put(
+            f"/api/pets/{pet_id}", json={"name": "Updated"}
+        )
+
+        assert response.status_code == 400
+        assert "integrity" in response.json()["detail"].lower()
+
+    async def test_update_pet_database_error(
+        self, client: AsyncClient, sample_pet_data: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test update pet handles database errors."""
+        from sqlalchemy.exc import SQLAlchemyError
+        from app.repositories.pet import PetRepository
+
+        # Create a pet first
+        create_response = await client.post("/api/pets/", json=sample_pet_data)
+        pet_id = create_response.json()["id"]
+
+        async def mock_update_error(*args, **kwargs):
+            raise SQLAlchemyError("Database connection failed")
+
+        monkeypatch.setattr(PetRepository, "update", mock_update_error)
+
+        response = await client.put(
+            f"/api/pets/{pet_id}", json={"name": "Updated"}
+        )
+
+        assert response.status_code == 500
+        assert "database error" in response.json()["detail"].lower()
+
+    async def test_delete_pet_database_error(
+        self, client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test delete pet handles database errors."""
+        from sqlalchemy.exc import SQLAlchemyError
+        from app.repositories.pet import PetRepository
+
+        async def mock_delete_error(*args, **kwargs):
+            raise SQLAlchemyError("Database connection failed")
+
+        monkeypatch.setattr(PetRepository, "delete", mock_delete_error)
+
+        response = await client.delete("/api/pets/1")
+
+        assert response.status_code == 500
+        assert "failed to delete" in response.json()["detail"].lower()
+
+    async def test_stats_database_error(
+        self, client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Test stats endpoint handles database errors."""
+        from sqlalchemy.exc import SQLAlchemyError
+        from app.repositories.pet import PetRepository
+
+        async def mock_count_error(*args, **kwargs):
+            raise SQLAlchemyError("Database connection failed")
+
+        monkeypatch.setattr(PetRepository, "count", mock_count_error)
+
+        response = await client.get("/api/pets/stats/summary")
+
+        assert response.status_code == 500
+        assert "failed to retrieve statistics" in response.json()["detail"].lower()
