@@ -114,6 +114,9 @@ asyncio_mode = "auto"
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
+markers = [
+    "timeout: mark test with a timeout"
+]
 
 [tool.coverage.run]
 source = ["app"]

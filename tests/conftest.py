@@ -9,11 +9,17 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+# Import these at module level since they don't import the routes
 from app.core.database import Base, get_db
-from app.main import app
 
 # Test database URL (using SQLite for tests)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+
+def pytest_configure(config):
+    """Pytest configuration hook - ensures modules are not imported too early."""
+    # This runs before coverage instrumentation when using pytest-cov
+    pass
 
 
 @pytest.fixture(scope="session")
@@ -56,20 +62,22 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
 @pytest_asyncio.fixture
 async def client(test_db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """Create a test client with overridden database dependency."""
-    
+    # Import app here to allow coverage instrumentation
+    from app.main import app
+
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
         yield test_db
-    
+
     # Override the database dependency
     app.dependency_overrides[get_db] = override_get_db
-    
+
     # Create async client
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://test"
     ) as ac:
         yield ac
-    
+
     # Clean up overrides
     app.dependency_overrides.clear()
 

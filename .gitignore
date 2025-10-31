@@ -30,6 +30,7 @@ venv.bak/
 .dmypy.json
 dmypy.json
 .pytest_cache/
+.ruff_cache/
 .coverage
 htmlcov/
 .tox/
