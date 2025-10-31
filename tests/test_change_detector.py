@@ -92,7 +92,7 @@ class TestChangeDetector:
         detector = ChangeDetector()
         await detector.disconnect()  # Should not raise
 
-    async def test_generate_report(self, test_db, capsys) -> None:
+    async def test_generate_report(self, test_db, capsys, monkeypatch) -> None:
         """Test report generation."""
         from app.repositories.pet import PetRepository
         from app.schemas.pet import PetCreate
@@ -100,6 +100,21 @@ class TestChangeDetector:
         # Create test pets
         repo = PetRepository(db=test_db)
         await repo.create(obj_in=PetCreate(name="Buddy", pet_type="dog"))
+
+        # Mock AsyncSessionLocal to use test_db
+        class MockSessionLocal:
+            def __init__(self):
+                pass
+
+            async def __aenter__(self):
+                return test_db
+
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                pass
+
+        monkeypatch.setattr(
+            "app.worker.change_detector.AsyncSessionLocal", MockSessionLocal
+        )
 
         detector = ChangeDetector()
         await detector.generate_report()
