@@ -10,7 +10,7 @@ from app.repositories.pet import PetRepository
 
 
 async def get_pet_repository(
-    db: Annotated[AsyncSession, Depends(get_db)]
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> PetRepository:
     """Get Pet repository instance."""
     return PetRepository(db)

@@ -35,11 +35,11 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
     """Create a test database session."""
     # Create test engine
     engine = create_async_engine(TEST_DATABASE_URL, echo=False)
-    
+
     # Create tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     # Create session
     TestSessionLocal = async_sessionmaker(
         bind=engine,
@@ -48,14 +48,14 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
         autocommit=False,
         autoflush=False,
     )
-    
+
     async with TestSessionLocal() as session:
         yield session
-    
+
     # Clean up
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-    
+
     await engine.dispose()
 
 
@@ -73,8 +73,7 @@ async def client(test_db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 
     # Create async client
     async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test"
+        transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
 
@@ -85,10 +84,7 @@ async def client(test_db: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 @pytest.fixture
 def sample_pet_data() -> dict[str, Any]:
     """Sample pet data for testing."""
-    return {
-        "name": "Buddy",
-        "pet_type": "dog"
-    }
+    return {"name": "Buddy", "pet_type": "dog"}
 
 
 @pytest.fixture

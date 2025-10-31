@@ -62,9 +62,7 @@ class TestGenerateReport:
         assert "PET DIRECTORY REPORT" in captured.out
         # Should still generate a report, just with 0 pets
 
-    async def test_generate_report_database_error(
-        self, capsys, monkeypatch
-    ) -> None:
+    async def test_generate_report_database_error(self, capsys, monkeypatch) -> None:
         """Test report generation handles database errors gracefully."""
         from app.core.database import AsyncSessionLocal
 
@@ -183,9 +181,7 @@ class TestMain:
         assert "Pet Report Worker Started" in captured.out
 
     @pytest.mark.timeout(5)
-    async def test_main_handles_keyboard_interrupt(
-        self, monkeypatch, capsys
-    ) -> None:
+    async def test_main_handles_keyboard_interrupt(self, monkeypatch, capsys) -> None:
         """Test that main loop handles KeyboardInterrupt gracefully."""
 
         async def mock_generate_report():
@@ -201,9 +197,7 @@ class TestMain:
         assert "shutting down gracefully" in captured.out
 
     @pytest.mark.timeout(5)
-    async def test_main_continues_after_error(
-        self, monkeypatch, capsys
-    ) -> None:
+    async def test_main_continues_after_error(self, monkeypatch, capsys) -> None:
         """Test that main loop continues after errors."""
         call_count = 0
 
@@ -232,9 +226,7 @@ class TestMain:
         assert "Unexpected error in worker loop" in captured.err
 
     @pytest.mark.timeout(5)
-    async def test_main_respects_interval_setting(
-        self, monkeypatch, capsys
-    ) -> None:
+    async def test_main_respects_interval_setting(self, monkeypatch, capsys) -> None:
         """Test that main loop uses configured interval."""
         import time
 
@@ -287,9 +279,7 @@ class TestRunWorker:
         run_worker()
         # Just verify it doesn't crash
 
-    def test_run_worker_handles_keyboard_interrupt(
-        self, monkeypatch, capsys
-    ) -> None:
+    def test_run_worker_handles_keyboard_interrupt(self, monkeypatch, capsys) -> None:
         """Test that run_worker handles KeyboardInterrupt."""
 
         def mock_asyncio_run(coro):

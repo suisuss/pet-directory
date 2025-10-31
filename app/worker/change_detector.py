@@ -212,7 +212,8 @@ class ChangeDetector:
             await self.connect()
 
         # Ensure connection is established
-        assert self.connection is not None, "Failed to establish database connection"
+        if self.connection is None:
+            raise RuntimeError("Failed to establish database connection")
 
         # Store the event loop for use in callbacks
         self.loop = asyncio.get_event_loop()

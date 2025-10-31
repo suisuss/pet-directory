@@ -108,9 +108,7 @@ class TestChangeDetector:
         assert "PET DIRECTORY REPORT" in captured.out
         assert "Buddy" in captured.out
 
-    async def test_generate_report_database_error(
-        self, monkeypatch, capsys
-    ) -> None:
+    async def test_generate_report_database_error(self, monkeypatch, capsys) -> None:
         """Test report generation handles database errors."""
         detector = ChangeDetector()
 
@@ -369,9 +367,7 @@ class TestMain:
         assert "Starting Database Change Detection Worker" in log_text
 
     @pytest.mark.timeout(5)
-    async def test_main_handles_keyboard_interrupt(
-        self, monkeypatch, caplog
-    ) -> None:
+    async def test_main_handles_keyboard_interrupt(self, monkeypatch, caplog) -> None:
         """Test that main handles KeyboardInterrupt."""
         import logging
 
