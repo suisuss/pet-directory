@@ -110,6 +110,13 @@ This project implements a comprehensive pet directory system with enterprise-gra
 │   ├── test.yml                  # Automated testing workflow
 │   ├── build.yml                 # Docker build verification
 │   └── quality.yml               # Code quality checks
+├── docs/                         # Documentation
+│   ├── CHALLENGE.md              # Original challenge specification
+│   ├── WALK-THROUGH.md           # Architecture walkthrough
+│   └── DOCKER.md                 # Docker build explanation
+├── scripts/                      # Utility scripts
+│   ├── test_api.sh               # API testing script
+│   └── generate_requirements.py  # Generate requirements.txt from pyproject.toml
 ├── alembic/                      # Database migrations with Alembic
 ├── docker-compose.yml            # Production orchestration
 ├── docker-compose.development.yml # Development with hot-reload & Adminer
@@ -117,8 +124,7 @@ This project implements a comprehensive pet directory system with enterprise-gra
 ├── pyproject.toml                # Project metadata and tool configuration
 ├── requirements.txt              # Auto-generated production dependencies
 ├── requirements-dev.txt          # Auto-generated dev dependencies
-├── dev.sh                        # Development helper CLI
-└── test_api.sh                   # API testing script
+└── dev.sh                        # Development helper CLI
 ```
 
 ## Quick Start
@@ -211,7 +217,7 @@ Available commands:
 Run the provided test script to populate sample data and test all endpoints:
 
 ```bash
-./test_api.sh
+./scripts/test_api.sh
 ```
 
 This script will:
@@ -484,7 +490,62 @@ With additional time, I would add:
 9. **Admin Interface**: React/Vue admin dashboard for pet management
 10. **WebSocket Support**: Real-time updates to connected clients using FastAPI WebSockets
 
+---
+
+## Development Reflection
+
+### Timeline (3.5 hours total)
+
+Working with Claude, I completed this project in approximately 3.5 hours, from 08:54 to 12:19 on October 31, 2025.
+
+#### Initial Implementation (08:54 - 09:48, ~1 hour)
+- Set up basic FastAPI application with CRUD endpoints
+- Configured async SQLAlchemy with PostgreSQL
+- Created Docker Compose for dev environment (API, worker, database, Adminer)
+- Implemented periodic report worker with Jinja2 templates
+- Added Alembic migrations
+- Created `scripts/test_api.sh` for simple testing
+
+#### Type Safety & Testing Foundation (09:48 - 10:32, ~45 minutes)
+- Added comprehensive type hints across codebase
+- Configured mypy with strict mode
+- Set up pytest with async support
+- Created initial test suite
+- Configured Ruff and Black for code quality
+- Centralized configuration in `pyproject.toml`
+
+#### Repository Pattern & Advanced Features (10:32 - 11:34, ~1 hour)
+- Implemented repository pattern with generic `BaseRepository`
+- Added specialized `PetRepository` with search and filtering
+- **Real-time change detection**: Implemented PostgreSQL LISTEN/NOTIFY
+  - Database triggers for automatic notifications
+  - Event-driven worker replaces periodic polling
+  - Sub-second latency for report generation
+- Fixed mypy type errors in change detector
+
+#### Testing & CI/CD (11:34 - 12:19, ~45 minutes)
+- Expanded test coverage from 50.97% to 94.79%
+- Added tests for repository pattern, change detection, and all API endpoints
+- Created GitHub Actions workflows (test, build, quality)
+- Added security scanning (Bandit, Safety)
+- Configured multi-stage Docker builds
+
+### Beyond Base Requirements
+
+What was implemented beyond the 4-hour challenge specification:
+- Repository pattern for clean data access layer
+- Real-time change detection (PostgreSQL LISTEN/NOTIFY)
+- 94.79% test coverage with comprehensive test suite
+- GitHub Actions CI/CD pipelines
+- Multi-stage Docker builds
+- Type safety with mypy strict mode
+- Code quality tools (Ruff, Black, Bandit, Safety)
+- Security scanning
+
+### Notes
+
+I would've used speckit however I'm not completely comfortable with it so I went for a more manual context engineering and dialectical approach with Claude.
+
 ## License
 
 MIT
-
