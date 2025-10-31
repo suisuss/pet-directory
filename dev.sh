@@ -378,8 +378,8 @@ format_code() {
     # Check if running in container
     if $COMPOSE_CMD -f docker-compose.development.yml ps | grep -q "api.*Up"; then
         print_info "Running formatters in container..."
-        $COMPOSE_CMD -f docker-compose.development.yml exec api black app/
-        $COMPOSE_CMD -f docker-compose.development.yml exec api ruff check --fix app/
+        $COMPOSE_CMD -f docker-compose.development.yml exec api python -m black app/
+        $COMPOSE_CMD -f docker-compose.development.yml exec api python -m ruff check --fix app/
     else
         print_warning "API container not running, trying local formatters..."
         if command -v black &> /dev/null; then
@@ -402,7 +402,7 @@ run_lint() {
     print_step "Running linting checks..."
     
     if $COMPOSE_CMD -f docker-compose.development.yml ps | grep -q "api.*Up"; then
-        $COMPOSE_CMD -f docker-compose.development.yml exec api ruff check app/
+        $COMPOSE_CMD -f docker-compose.development.yml exec api python -m ruff check app/
     else
         print_warning "API container not running, trying local linter..."
         if command -v ruff &> /dev/null; then
@@ -420,7 +420,7 @@ run_typecheck() {
     print_step "Running type checking..."
     
     if $COMPOSE_CMD -f docker-compose.development.yml ps | grep -q "api.*Up"; then
-        $COMPOSE_CMD -f docker-compose.development.yml exec api mypy app/
+        $COMPOSE_CMD -f docker-compose.development.yml exec api python -m mypy app/
     else
         print_warning "API container not running, trying local mypy..."
         if command -v mypy &> /dev/null; then
